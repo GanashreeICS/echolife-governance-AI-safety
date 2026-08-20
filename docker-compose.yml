@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: echolife-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: echolife
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Gana@9380
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend-app:
+    build: src/main/java/com/echolife/backend
+    container_name: echolife-backend
+    restart: always
+    depends_on:
+      - postgres-db
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/echolife
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: Gana@9380
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+volumes:
+  postgres_data:
