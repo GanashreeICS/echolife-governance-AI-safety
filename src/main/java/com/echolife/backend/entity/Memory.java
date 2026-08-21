@@ -51,7 +51,7 @@ public class Memory {
     @JoinColumn(name = "prompt_id")
     private Prompt prompt;
 
-    @Column(nullable = false, updatable = false)
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

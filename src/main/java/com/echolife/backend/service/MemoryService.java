@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class MemoryService {
@@ -33,18 +34,17 @@ public class MemoryService {
         this.governanceService = governanceService;
     }
 
-    // 1. Standard Memory Creation with Governance validation & AI Reflection
     public Memory createMemory(Long userId, Memory memory) {
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
+        Optional<User> userOpt = userRepository.findById(userId);
+        if (userOpt.isEmpty()) {
             return null;
         }
 
-        // Validate Consent, Persona, Response Mode & Content Safety
+        // Validate Governance, Consent & Content Safety
         ResponseMode mode = memory.getResponseMode() != null ? memory.getResponseMode() : ResponseMode.REFLECTION;
         governanceService.validateAiExecution(userId, memory.getPersonaId(), mode, memory.getDescription());
 
-        memory.setUser(user);
+        memory.setUser(userOpt.get());
         if (memory.getMemoryDate() == null) {
             memory.setMemoryDate(LocalDate.now());
         }
@@ -53,21 +53,20 @@ public class MemoryService {
         return memoryRepository.save(memory);
     }
 
-    // 2. Create Memory in response to a specific Prompt with Governance validation
     public Memory createMemoryFromPrompt(Long userId, Long promptId, Memory memory) {
-        User user = userRepository.findById(userId).orElse(null);
-        Prompt prompt = promptRepository.findById(promptId).orElse(null);
+        Optional<User> userOpt = userRepository.findById(userId);
+        Optional<Prompt> promptOpt = promptRepository.findById(promptId);
 
-        if (user == null || prompt == null) {
+        if (userOpt.isEmpty() || promptOpt.isEmpty()) {
             return null;
         }
 
-        // Validate Consent, Persona, Response Mode & Content Safety
+        // Validate Governance, Consent & Content Safety
         ResponseMode mode = memory.getResponseMode() != null ? memory.getResponseMode() : ResponseMode.REFLECTION;
         governanceService.validateAiExecution(userId, memory.getPersonaId(), mode, memory.getDescription());
 
-        memory.setUser(user);
-        memory.setPrompt(prompt);
+        memory.setUser(userOpt.get());
+        memory.setPrompt(promptOpt.get());
         if (memory.getMemoryDate() == null) {
             memory.setMemoryDate(LocalDate.now());
         }
