@@ -1,52 +1,48 @@
-# EchoLife Backend 🌿
+# EchoLife - AI Governance & Safety Engine
 
-EchoLife is an AI-powered life logging, personal reflection, and digital memory archive application. The backend is built with Spring Boot 4, Java 26, Spring Data JPA, and PostgreSQL, featuring time-capsule locking mechanisms and automated reflection workflows.
+A robust, enterprise-ready Spring Boot microservice designed for **Consent Governance**, **AI Persona Orchestration**, and **Real-Time Safety & Risk Screening**.
 
 ---
 
-## 📁 Project Directory Structure
+## Key Features
 
-```text
-echolife-backend/
-├── src/
-│   ├── main/
-│   │   ├── java/com/echolife/backend/
-│   │   │   ├── config/
-│   │   │   │   └── CorsConfig.java               # Cross-Origin Resource Sharing settings
-│   │   │   ├── controller/
-│   │   │   │   ├── AuthController.java           # Authentication & session endpoints
-│   │   │   │   ├── MemoryController.java         # Memory CRUD & time capsule endpoints
-│   │   │   │   ├── PromptController.java         # Reflection prompt endpoints
-│   │   │   │   └── UserController.java           # User profile management
-│   │   │   ├── dto/
-│   │   │   │   ├── AuthResponse.java             # Auth payload responses
-│   │   │   │   ├── LoginRequest.java             # User login payload
-│   │   │   │   └── RegisterRequest.java          # User registration payload
-│   │   │   ├── entity/
-│   │   │   │   ├── Memory.java                   # Memory & time-capsule JPA model
-│   │   │   │   ├── Prompt.java                   # AI reflection prompt JPA model
-│   │   │   │   └── User.java                     # Application user JPA model
-│   │   │   ├── repository/
-│   │   │   │   ├── MemoryRepository.java         # Memory query methods & JPQL
-│   │   │   │   ├── PromptRepository.java         # Prompt storage queries
-│   │   │   │   └── UserRepository.java           # User lookup & authentication queries
-│   │   │   ├── service/
-│   │   │   │   ├── AiReflectionService.java      # Automated reflection generation logic
-│   │   │   │   ├── AuthService.java              # User registration & credential hashing
-│   │   │   │   ├── MemoryService.java            # Memory business logic & capsule filters
-│   │   │   │   └── PromptService.java            # Prompt retrieval & assignments
-│   │   │   └── EcholifeBackendApplication.java   # Spring Boot entry point
-│   │   └── resources/
-│   │       ├── application.properties            # Database and application configuration
-│   │       ├── static/
-│   │       └── templates/
-│   └── test/
-│       └── java/com/echolife/backend/
-│           ├── AuthControllerTest.java           # MockMvc web layer unit tests
-│           ├── AuthServiceTest.java              # Authentication unit tests
-│           ├── MemoryServiceTest.java            # Memory & time capsule unit tests
-│           └── EcholifeBackendApplicationTests.java
-├── docker-compose.yml                            # Multi-container orchestration (DB + App)
-├── Dockerfile                                    # Multi-stage JDK 26 build specification
-├── pom.xml                                       # Maven build & dependencies descriptor
-└── README.md                                     # Project overview and API guide
+- **Consent Governance Framework**: Strict enforcement of granular user consent (`AI_DATA_PROCESSING`, `LEGACY_SHARING`, `TIME_CAPSULE_ACCESS`) prior to any data or AI processing.
+- **Rule-Based AI Safety Engine**: Multi-tiered safety screening that scans for potential self-harm, harassment, hate speech, and violent content, blocking high-risk inputs before reaching AI models.
+- **Dynamic Persona Management**: Configurable system personas (`The Compassionate Mentor`, `The Poetic Chronicler`) supporting contextual response modes (`REFLECTION`, `ADVICE`, `STORY`, `BLESSING`).
+- **Memory & Reflection Pipeline**: Full memory lifecycle management integrated with automated AI-assisted reflection and summarization.
+- **Security & Authorization**: Stateless JWT authentication with role-based access control (RBAC) via Spring Security.
+- **API Documentation**: Interactive OpenAPI 3 / Swagger UI interface with integrated Bearer token authorization.
+
+---
+
+## Tech Stack
+
+- **Language / Framework**: Java 17, Spring Boot 3.3.2
+- **Security**: Spring Security 6, JJWT (io.jsonwebtoken)
+- **Persistence**: Spring Data JPA, Hibernate, PostgreSQL
+- **Validation**: Jakarta Validation API (Hibernate Validator)
+- **API Docs**: SpringDoc OpenAPI UI 2.5.0
+- **Build Tool**: Maven
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **Java Development Kit (JDK)**: Version 17 or higher
+- **PostgreSQL Database**: Running on `localhost:5432` with a database named `echolife`
+- **Maven**: Bundled with IntelliJ IDEA or installed locally
+
+### Database Configuration
+
+Update `src/main/resources/application.properties` with your PostgreSQL credentials:
+
+```properties
+spring.datasource.url=jdbc:postgresql://localhost:5432/echolife
+spring.datasource.username=postgres
+spring.datasource.password=YOUR_POSTGRES_PASSWORD
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
