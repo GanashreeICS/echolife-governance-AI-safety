@@ -2,6 +2,7 @@ package com.echolife.backend.service;
 
 import com.echolife.backend.entity.Memory;
 import com.echolife.backend.entity.Prompt;
+import com.echolife.backend.entity.ResponseMode;
 import com.echolife.backend.entity.User;
 import com.echolife.backend.repository.MemoryRepository;
 import com.echolife.backend.repository.PromptRepository;
@@ -18,29 +19,41 @@ public class MemoryService {
     private final UserRepository userRepository;
     private final PromptRepository promptRepository;
     private final AiReflectionService aiReflectionService;
+    private final GovernanceService governanceService;
 
     public MemoryService(MemoryRepository memoryRepository,
                          UserRepository userRepository,
                          PromptRepository promptRepository,
-                         AiReflectionService aiReflectionService) {
+                         AiReflectionService aiReflectionService,
+                         GovernanceService governanceService) {
         this.memoryRepository = memoryRepository;
         this.userRepository = userRepository;
         this.promptRepository = promptRepository;
         this.aiReflectionService = aiReflectionService;
+        this.governanceService = governanceService;
     }
 
-    // 1. Standard Memory Creation with AI Reflection auto-generation
+    // 1. Standard Memory Creation with Governance validation & AI Reflection
     public Memory createMemory(Long userId, Memory memory) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
             return null;
         }
+
+        // Validate Consent, Persona, Response Mode & Content Safety
+        ResponseMode mode = memory.getResponseMode() != null ? memory.getResponseMode() : ResponseMode.REFLECTION;
+        governanceService.validateAiExecution(userId, memory.getPersonaId(), mode, memory.getDescription());
+
         memory.setUser(user);
+        if (memory.getMemoryDate() == null) {
+            memory.setMemoryDate(LocalDate.now());
+        }
+
         aiReflectionService.generateReflection(memory);
         return memoryRepository.save(memory);
     }
 
-    // 2. Create Memory in response to a specific Prompt
+    // 2. Create Memory in response to a specific Prompt with Governance validation
     public Memory createMemoryFromPrompt(Long userId, Long promptId, Memory memory) {
         User user = userRepository.findById(userId).orElse(null);
         Prompt prompt = promptRepository.findById(promptId).orElse(null);
@@ -49,8 +62,16 @@ public class MemoryService {
             return null;
         }
 
+        // Validate Consent, Persona, Response Mode & Content Safety
+        ResponseMode mode = memory.getResponseMode() != null ? memory.getResponseMode() : ResponseMode.REFLECTION;
+        governanceService.validateAiExecution(userId, memory.getPersonaId(), mode, memory.getDescription());
+
         memory.setUser(user);
         memory.setPrompt(prompt);
+        if (memory.getMemoryDate() == null) {
+            memory.setMemoryDate(LocalDate.now());
+        }
+
         aiReflectionService.generateReflection(memory);
         return memoryRepository.save(memory);
     }

@@ -1,8 +1,10 @@
 package com.echolife.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "memories")
@@ -16,41 +18,67 @@ public class Memory {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @NotBlank(message = "Description is required")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
+
+    private String emotionalTone;
 
     private LocalDate memoryDate;
 
-    // Time Capsule Attributes
     private Boolean isTimeCapsule = false;
+
     private LocalDate unlockDate;
 
-    // AI & Prompt Linkage Attributes
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "prompt_id")
-    private Prompt prompt;
+    @Column(columnDefinition = "TEXT")
+    private String aiReflection;
 
     @Column(columnDefinition = "TEXT")
     private String aiReflectionSummary;
 
-    private String emotionalTone; // e.g. Nostalgic, Grateful, Joyful
+    // Governance & Persona Extensions
+    private Long personaId;
+
+    @Enumerated(EnumType.STRING)
+    private ResponseMode responseMode = ResponseMode.REFLECTION;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"password", "memories"})
     private User user;
 
-    public Memory() {
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "prompt_id")
+    private Prompt prompt;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+
+    public Memory() {}
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        if (this.memoryDate == null) {
+            this.memoryDate = LocalDate.now();
+        }
+        if (this.isTimeCapsule == null) {
+            this.isTimeCapsule = false;
+        }
+        if (this.responseMode == null) {
+            this.responseMode = ResponseMode.REFLECTION;
+        }
     }
 
-    public Memory(String title, String description, LocalDate memoryDate, Boolean isTimeCapsule, LocalDate unlockDate, User user) {
-        this.title = title;
-        this.description = description;
-        this.memoryDate = memoryDate;
-        this.isTimeCapsule = isTimeCapsule != null ? isTimeCapsule : false;
-        this.unlockDate = unlockDate;
-        this.user = user;
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -73,6 +101,14 @@ public class Memory {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getEmotionalTone() {
+        return emotionalTone;
+    }
+
+    public void setEmotionalTone(String emotionalTone) {
+        this.emotionalTone = emotionalTone;
     }
 
     public LocalDate getMemoryDate() {
@@ -99,12 +135,12 @@ public class Memory {
         this.unlockDate = unlockDate;
     }
 
-    public Prompt getPrompt() {
-        return prompt;
+    public String getAiReflection() {
+        return aiReflection;
     }
 
-    public void setPrompt(Prompt prompt) {
-        this.prompt = prompt;
+    public void setAiReflection(String aiReflection) {
+        this.aiReflection = aiReflection;
     }
 
     public String getAiReflectionSummary() {
@@ -115,12 +151,20 @@ public class Memory {
         this.aiReflectionSummary = aiReflectionSummary;
     }
 
-    public String getEmotionalTone() {
-        return emotionalTone;
+    public Long getPersonaId() {
+        return personaId;
     }
 
-    public void setEmotionalTone(String emotionalTone) {
-        this.emotionalTone = emotionalTone;
+    public void setPersonaId(Long personaId) {
+        this.personaId = personaId;
+    }
+
+    public ResponseMode getResponseMode() {
+        return responseMode != null ? responseMode : ResponseMode.REFLECTION;
+    }
+
+    public void setResponseMode(ResponseMode responseMode) {
+        this.responseMode = responseMode;
     }
 
     public User getUser() {
@@ -129,5 +173,21 @@ public class Memory {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Prompt getPrompt() {
+        return prompt;
+    }
+
+    public void setPrompt(Prompt prompt) {
+        this.prompt = prompt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }
